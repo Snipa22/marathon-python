@@ -9,6 +9,10 @@ except ImportError:
 import re
 
 
+def is_stringy(obj):
+    return isinstance(obj, str) or isinstance(obj, unicode)
+
+
 class MarathonJsonEncoder(json.JSONEncoder):
     """Custom JSON encoder for Marathon object serialization."""
 
@@ -19,9 +23,9 @@ class MarathonJsonEncoder(json.JSONEncoder):
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
 
-        if isinstance(obj, collections.Iterable) and not isinstance(obj, types.StringTypes):
+        if isinstance(obj, collections.Iterable) and not is_stringy(obj):
             try:
-                return {k: self.default(v) for k,v in obj.iteritems()}
+                return {k: self.default(v) for k,v in obj.items()}
             except AttributeError:
                 return [self.default(e) for e in obj]
 
@@ -38,9 +42,9 @@ class MarathonMinimalJsonEncoder(json.JSONEncoder):
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
 
-        if isinstance(obj, collections.Iterable) and not isinstance(obj, types.StringTypes):
+        if isinstance(obj, collections.Iterable) and not is_stringy(obj):
             try:
-                return {k: self.default(v) for k,v in obj.iteritems() if (v or v == False)}
+                return {k: self.default(v) for k,v in obj.items() if (v or v == False)}
             except AttributeError:
                 return [self.default(e) for e in obj if (e or e == False)]
 

@@ -1,3 +1,42 @@
+## 0.7.2 (<not-yet-released>)
+
+Support for Marathon 0.9.0
+
+Changes:
+* Add `accepted_resource_role` field to `MarathonApp`
+
+## 0.7.1 (2015-07-14)
+
+Critical fixes and @solarkennedy has been addded as a contributor!
+
+Changes (all @solarkennedy - huge thanks):
+* Fixed `MarathonApp` regex issue
+* Hooked up Travis CI
+* Added integration tests
+
+## 0.7.0 (2015-07-05)
+
+Support for Marathon 0.8.2
+
+Changes:
+* Tests (huge thanks @kevinschoon)
+* Added support for Marathon EventBus (thanks @kevinschoon)
+* Marathon app_id and group_id validation (thanks @mattrobenolt)
+* Fixed bug in creation of deployment.steps list (thanks @AFriemann)
+* Add `ignore_http1xx` on `MarathonHealthCheck` (thanks @mrtheb)
+
+## 0.6.15 (2015-06-05)
+
+Changes:
+* Fix `force_pull_image` on `MarathonDockerContainer` (thanks @mattrobenolt)
+
+## 0.6.14 (2015-05-28)
+
+Changes:
+* Add `force_pull_image` field to `MarathonDockerContainer` (thanks @solarkennedy)
+* Add `kwargs` to `MarathonDockerContainer` for better forward compatibility (thanks @g----)
+* Fix issue with `use_2to3` (thanks @vitan)
+
 ## 0.6.13 (2015-03-24)
 
 Support for Marathon 0.8.1

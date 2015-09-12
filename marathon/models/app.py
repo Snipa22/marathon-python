@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from .base import MarathonResource, MarathonObject
+from .base import MarathonResource, MarathonObject, assert_valid_path
 from .constraint import MarathonConstraint
 from .container import MarathonContainer
 from .deployment import MarathonDeployment
@@ -12,6 +12,9 @@ class MarathonApp(MarathonResource):
 
     See: https://mesosphere.github.io/marathon/docs/rest-api.html#post-/v2/apps
 
+    :param list[str] accepted_resource_roles: a list of resource roles (the resource offer
+                                              must contain at least one of these for the app
+                                              to be launched on that host)
     :param list[str] args: args form of the command to run
     :param int backoff_factor: multiplier for subsequent backoff
     :param int backoff_seconds: base time, in seconds, for exponential backoff
@@ -59,20 +62,21 @@ class MarathonApp(MarathonResource):
     ]
     """List of attributes which may be updated/changed after app creation"""
 
-    CREATE_ONLY_ATTRIBUTES = ['id']
+    CREATE_ONLY_ATTRIBUTES = ['id', 'accepted_resource_roles']
     """List of attributes that should only be passed on creation"""
 
     READ_ONLY_ATTRIBUTES = ['deployments', 'tasks', 'tasks_running', 'tasks_staged', 'tasks_healthy', 'tasks_unhealthy']
     """List of read-only attributes"""
 
-    def __init__(self, args=None, backoff_factor=None, backoff_seconds=None, cmd=None, constraints=None, container=None,
-                 cpus=None, dependencies=None, deployments=None, disk=None, env=None, executor=None, health_checks=None,
-                 id=None, instances=None, labels=None, last_task_failure=None, max_launch_delay_seconds=None, mem=None,
-                 ports=None, require_ports=None, store_urls=None, task_rate_limit=None, tasks=None, tasks_running=None,
-                 tasks_staged=None, tasks_healthy=None, tasks_unhealthy=None, upgrade_strategy=None, uris=None, user=None,
-                 version=None):
+    def __init__(self, accepted_resource_roles=None, args=None, backoff_factor=None, backoff_seconds=None, cmd=None,
+                 constraints=None, container=None, cpus=None, dependencies=None, deployments=None, disk=None, env=None,
+                 executor=None, health_checks=None, id=None, instances=None, labels=None, last_task_failure=None,
+                 max_launch_delay_seconds=None, mem=None, ports=None, require_ports=None, store_urls=None,
+                 task_rate_limit=None, tasks=None, tasks_running=None, tasks_staged=None, tasks_healthy=None,
+                 tasks_unhealthy=None, upgrade_strategy=None, uris=None, user=None, version=None):
 
         # self.args = args or []
+        self.accepted_resource_roles = accepted_resource_roles
         self.args = args
         # Marathon 0.7.0-RC1 throws a validation error if this is [] and cmd is passed:
         # "error": "AppDefinition must either contain a 'cmd' or a 'container'."
@@ -100,7 +104,7 @@ class MarathonApp(MarathonResource):
             hc if isinstance(hc, MarathonHealthCheck) else MarathonHealthCheck().from_json(hc)
             for hc in (health_checks or [])
         ]
-        self.id = id
+        self.id = assert_valid_path(id)
         self.instances = instances
         self.labels = labels or {}
         self.last_task_failure = last_task_failure if (isinstance(last_task_failure, MarathonTaskFailure) or last_task_failure is None) \
@@ -139,10 +143,12 @@ class MarathonHealthCheck(MarathonObject):
     :param int port_index: target port as indexed in app's `ports` array
     :param str protocol: health check protocol ('HTTP', 'TCP', or 'COMMAND')
     :param int timeout_seconds: how long before a waiting health check is considered failed
+    :param bool ignore_http1xx: Ignore HTTP informational status codes 100 to 199.
+    :param dict kwargs: additional arguments for forward compatibility
     """
 
     def __init__(self, command=None, grace_period_seconds=None, interval_seconds=None, max_consecutive_failures=None,
-                 path=None, port_index=None, protocol=None, timeout_seconds=None):
+                 path=None, port_index=None, protocol=None, timeout_seconds=None, ignore_http1xx=None, **kwargs):
         self.command = command
         self.grace_period_seconds = grace_period_seconds
         self.interval_seconds = interval_seconds
@@ -151,6 +157,10 @@ class MarathonHealthCheck(MarathonObject):
         self.port_index = port_index
         self.protocol = protocol
         self.timeout_seconds = timeout_seconds
+        self.ignore_http1xx = ignore_http1xx
+        # additional not previously known healthcheck attributes
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class MarathonTaskFailure(MarathonObject):

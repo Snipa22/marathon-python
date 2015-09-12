@@ -1,12 +1,14 @@
 # marathon-python
 
+[![Build Status](https://travis-ci.org/thefactory/marathon-python.svg?branch=master)](https://travis-ci.org/thefactory/marathon-python)
+
 This is a Python library for interfacing with [Marathon](https://github.com/mesosphere/marathon) servers via Marathon's [REST API](https://mesosphere.github.io/marathon/docs/rest-api.html).
 
 #### Compatibility
 
 marathon-python is primarily developed against Marathon 0.8.x (see [Marathon docs](https://mesosphere.github.io/marathon/))
 
-* For Marathon 0.8.x, use the latest release
+* For Marathon 0.8.x-0.9.x, use the latest release
 * For Marathon 0.7.x, use marathon-python 0.6.10
 * For older versions, please see `CHANGELOG.md`
 
@@ -26,6 +28,23 @@ pip install -e git+git@github.com:thefactory/marathon-python.git#egg=marathon
 ```bash
 git clone git@github.com:thefactory/marathon-python
 python marathon-python/setup.py install
+```
+
+## Testing
+
+`marathon-python` uses Travis to test the code against different versions of Marathon.
+You can run the tests locally on a Linux machine that has docker on it:
+
+### Running The Tests
+
+```bash
+make itests
+```
+
+### Running The Tests Against a Specific Version of Marathon
+
+```bash
+MARATHONVERSION=0.9.0 make itests
 ```
 
 ## Documentation
